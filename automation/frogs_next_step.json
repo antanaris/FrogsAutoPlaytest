@@ -1,0 +1,9 @@
+{
+  "steps": [
+    {
+      "type": "click",
+      "selectorType": "css",
+      "selector": "tr > :nth-child(1) img"
+    }
+  ]
+}
