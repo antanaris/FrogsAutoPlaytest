@@ -12,6 +12,7 @@ class FrogsGame():
         # initializing game parameters
         self.NoPossibleMoves = False
         self.current_state: Dict[int, int] = {}
+        self.next_moves_json = "frogs_next_step.json"
 
     def ReadCurrentState(self, source_code):
         htmlsource = bs4.BeautifulSoup(source_code)
@@ -30,6 +31,8 @@ class FrogsGame():
         print(self.current_state)
 
     def NextMove(self, source_code):
+        # do we need to clean up frogs_next_step.json?
+
         # read current state from the page source & check if previous move changed the game state
         self.ReadCurrentState(source_code)
         # calculate next move

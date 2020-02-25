@@ -29,9 +29,11 @@ class Frogs(unittest.TestCase):
         while (self.is_alert_present() == False ) and (game.NoPossibleMoves == False):
         # Calculate next movement based on the changes of the game state and write json with next move
             game.NextMove(driver.page_source)
-            # load next move from frogs.json and execute it
+            # load next move from frogs.json and execute it if there are possible moves
+            if game.NoPossibleMoves == False:
+                self.executeSteps(game.next_moves_json)
 
-            # driver.find_element_by_xpath("//img[contains(@src,'frog0.gif')]").click()
+            # if success -- empty frogs_next_step.json
 
         if self.is_alert_present():
             # game is won
@@ -80,6 +82,26 @@ class Frogs(unittest.TestCase):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
+    def executeSteps(self, steps_json_url):
+        step = 0
+        type = ""
+        selectorType = ""
+        selector = ""
+
+        driver = self.driver
+
+        # Read the json file
+        print("Preparing to load next steps json file")
+        with open(steps_json_url) as json_file:
+            next_steps_json = json.load(json_file)
+
+        # Get the list of steps to execute
+
+
+        # Run the steps with selenium driver
+        if selectorType == "css":
+            if type == "click":
+                driver.find_element_by_xpath(selector).click()
 
 if __name__ == "__main__":
     unittest.main()
