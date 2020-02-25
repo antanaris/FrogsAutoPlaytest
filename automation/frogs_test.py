@@ -29,7 +29,7 @@ class Frogs(unittest.TestCase):
         while game.NoPossibleMoves == False:
             # Calculate next movement based on the changes of the game state and write json with next move
             game.NextMove(driver.page_source)
-            # load next move from frogs.json and execute it if there are possible moves
+            # load next move from next_step.json and execute it if there are possible moves
             if game.NoPossibleMoves == False:
                 self.executeSteps(game.next_moves_json)
             # stopping playing game if we have
@@ -88,9 +88,9 @@ class Frogs(unittest.TestCase):
         if selector_type == "css":
             if action_type == "click":
                 driver.find_element_by_css_selector(selector).click()
-                # TODO: implement waiting, so that user can see what's going on, for example by offering him to click Next
+                # waiting, so that user can see what's going on
                 if wait:
-                    time.sleep(3)
+                    time.sleep(2)
 
     def executeSteps(self, steps_json_url):
         # Read the json file
