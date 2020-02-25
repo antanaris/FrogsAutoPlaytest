@@ -6,7 +6,7 @@ import bs4
 
 
 class FrogsGame():
-    """Self-learning logic for solving frogs game"""
+    """Self-learning for solving frogs game using memory"""
 
     def __init__(self):
         # initializing game parameters
@@ -33,8 +33,16 @@ class FrogsGame():
     def NextMove(self, source_code):
         # do we need to clean up frogs_next_step.json?
 
+        # defining possible actions
+        i = int(1)
+        i_min = 1
+        i_max = 9
+        def possible_action(i):
+            return dict(type="click", selectorType="css", selector="tr > :nth-child(" + str(i) + ") img")
+
         # read current state from the page source & check if previous move changed the game state
         self.ReadCurrentState(source_code)
+        print("Current state: " + str(self.current_state) +". Calculating next move")
         # calculate next move
             # check in the game memory if there is a winning path
 
@@ -47,3 +55,15 @@ class FrogsGame():
         # actual check that there are no possible moves (try all 1 to 9 and see no difference in self.current_state)
         self.NoPossibleMoves = True
         # write next move into frog.json
+
+    def is_won(self, alert_text):
+        moves = 0
+        time = 0
+        # TODO: extract number of moves and time from the alert text
+        # print("Game is won in " + str(moves) + " moves, " + str(time) + " sec")
+        print(alert_text)
+        # update game memory with info about winning path
+
+    def is_lost(self):
+        print("Game is lost. No possible moves")
+        # update game memory with info about loosing path

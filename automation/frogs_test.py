@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+import time
 import unittest
 
 from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException
 from selenium.common.exceptions import NoSuchElementException
 
-import frogs_logic
+from models import frogs_logic
 
 import json
-import jsonpath
 
 
 # Starting testcases
@@ -26,33 +26,30 @@ class Frogs(unittest.TestCase):
         game = frogs_logic.FrogsGame()
         driver.get("http://www.lutanho.net/play/frogs.html")
 
-        self.executeSteps(game.next_moves_json)
-
-        while (self.is_alert_present() == False ) and (game.NoPossibleMoves == False):
-        # Calculate next movement based on the changes of the game state and write json with next move
+        while game.NoPossibleMoves == False:
+            # Calculate next movement based on the changes of the game state and write json with next move
             game.NextMove(driver.page_source)
             # load next move from frogs.json and execute it if there are possible moves
             if game.NoPossibleMoves == False:
                 self.executeSteps(game.next_moves_json)
-
-            # if success -- empty frogs_next_step.json
+            # stopping playing game if we have
+            if self.is_alert_present() == True:
+                break
 
         if self.is_alert_present():
             # game is won
-            self.assertIn("Super, you solved this game", self.close_alert_and_get_its_text())
+            alert_message = self.close_alert_and_get_its_text()
+            self.assertIn("Super, you solved this game", alert_message)
             # calculate and write the game stats to memory
+            game.is_won(alert_message)
 
-            print("Game is won")
         elif game.NoPossibleMoves:
-            # game is lost
-            # No possible moves
+            # game is lost -- no possible moves
             self.assertEqual(game.NoPossibleMoves, True)
             # calculate and write the game stats to memory
+            game.is_lost()
 
-            print("Game is lost. No possible moves")
-        else:
-            # we're not supposed to get here, unless something went wrong
-            print("Something went wrong")
+        # TODO: Create test logs
 
     def is_element_present(self, how, what):
         try:
@@ -84,16 +81,20 @@ class Frogs(unittest.TestCase):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
-    def executeStep(self, selector_type, selector, type):
+    def executeStep(self, selector_type, selector, action_type, wait = True):
+        print("Executing step. " + action_type + " on " + selector_type + ":" + selector)
         driver = self.driver
         # Run a step with selenium driver
         if selector_type == "css":
-            if type == "click":
+            if action_type == "click":
                 driver.find_element_by_css_selector(selector).click()
+                # TODO: implement waiting, so that user can see what's going on, for example by offering him to click Next
+                if wait:
+                    time.sleep(3)
 
     def executeSteps(self, steps_json_url):
         # Read the json file
-        print("Preparing to load next steps json file")
+        print("Loading next steps from json file")
         with open(steps_json_url) as json_file:
             next_steps_json = json.loads(json_file.read())
 
@@ -102,8 +103,8 @@ class Frogs(unittest.TestCase):
             # TODO: add exception handling in case json has variable structure OR make the fields in json obligatory
             selector_type = step["selectorType"]
             selector = step["selector"]
-            type = step["type"]
-            self.executeStep(selector_type, selector, type)
+            action_type = step["type"]
+            self.executeStep(selector_type, selector, action_type)
 
 if __name__ == "__main__":
     unittest.main()
