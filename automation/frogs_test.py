@@ -26,6 +26,8 @@ class Frogs(unittest.TestCase):
         game = frogs_logic.FrogsGame()
         driver.get("http://www.lutanho.net/play/frogs.html")
 
+        self.executeSteps(game.next_moves_json)
+
         while (self.is_alert_present() == False ) and (game.NoPossibleMoves == False):
         # Calculate next movement based on the changes of the game state and write json with next move
             game.NextMove(driver.page_source)
@@ -82,26 +84,26 @@ class Frogs(unittest.TestCase):
         self.driver.quit()
         self.assertEqual([], self.verificationErrors)
 
-    def executeSteps(self, steps_json_url):
-        step = 0
-        type = ""
-        selectorType = ""
-        selector = ""
-
+    def executeStep(self, selector_type, selector, type):
         driver = self.driver
+        # Run a step with selenium driver
+        if selector_type == "css":
+            if type == "click":
+                driver.find_element_by_css_selector(selector).click()
 
+    def executeSteps(self, steps_json_url):
         # Read the json file
         print("Preparing to load next steps json file")
         with open(steps_json_url) as json_file:
-            next_steps_json = json.load(json_file)
+            next_steps_json = json.loads(json_file.read())
 
-        # Get the list of steps to execute
-
-
-        # Run the steps with selenium driver
-        if selectorType == "css":
-            if type == "click":
-                driver.find_element_by_xpath(selector).click()
+        # Get the list of steps and execute them
+        for step in next_steps_json["steps"]:
+            # TODO: add exception handling in case json has variable structure OR make the fields in json obligatory
+            selector_type = step["selectorType"]
+            selector = step["selector"]
+            type = step["type"]
+            self.executeStep(selector_type, selector, type)
 
 if __name__ == "__main__":
     unittest.main()
