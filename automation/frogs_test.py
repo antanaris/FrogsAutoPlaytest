@@ -24,14 +24,12 @@ class Frogs(unittest.TestCase):
     def test_frogs(self):
         driver = self.driver
         game = frogs_logic.FrogsGame()
-        driver.get("http://www.lutanho.net/play/frogs.html")
 
         while game.NoPossibleMoves == False:
             # Calculate next movement based on the changes of the game state and write json with next move
             game.NextMove(driver.page_source)
-            # load next move from next_step.json and execute it if there are possible moves
-            if game.NoPossibleMoves == False:
-                self.executeSteps(game.next_moves_json)
+            # load next move from next_step.json and execute it
+            self.executeSteps(game.next_moves_json)
             # stopping playing game if we have
             if self.is_alert_present() == True:
                 break
@@ -82,19 +80,26 @@ class Frogs(unittest.TestCase):
         self.assertEqual([], self.verificationErrors)
 
     def executeStep(self, selector_type, selector, action_type, wait = True):
-        print("Executing step. " + action_type + " on " + selector_type + ":" + selector)
         driver = self.driver
         # Run a step with selenium driver
-        if selector_type == "css":
-            if action_type == "click":
-                driver.find_element_by_css_selector(selector).click()
-                # waiting, so that user can see what's going on
-                if wait:
-                    time.sleep(2)
+        try:
+            if selector_type == "css":
+                if action_type == "click":
+                    driver.find_element_by_css_selector(selector).click()
+            if selector_type == "url":
+                if action_type == "get":
+                    driver.get(selector)
+            print("Executing action " + action_type + " on " + selector_type + ":" + selector + " -- Success")
+        except:
+            # TODO: add ability to game model to track actual game behaviour (by default assumes exec was successful)
+            print("Executing action " + action_type + " on " + selector_type + ":" + selector + " -- Failure")
+        # waiting, so that user can see what's going on
+        if wait:
+            time.sleep(2)
 
     def executeSteps(self, steps_json_url):
         # Read the json file
-        print("Loading next steps from json file")
+        # print("Loading next steps from json file")
         with open(steps_json_url) as json_file:
             next_steps_json = json.loads(json_file.read())
 
@@ -103,7 +108,7 @@ class Frogs(unittest.TestCase):
             # TODO: add exception handling in case json has variable structure OR make the fields in json obligatory
             selector_type = step["selectorType"]
             selector = step["selector"]
-            action_type = step["type"]
+            action_type = step["action"]
             self.executeStep(selector_type, selector, action_type)
 
 if __name__ == "__main__":
